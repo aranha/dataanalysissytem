@@ -49,7 +49,6 @@ public class FileWatcher implements Runnable {
 
     private final Path pathOutput = Paths.get(System.getProperty("user.home"), "/data/out/");
 
-
     public FileWatcher(LineInputService lineInputService, FileRepository fileRepository, CustomerRepository customerRepository, SalesmanRepository salesmanRepository, SaleRepository saleRepository, FilesReader filesReader, FileWriter fileWriter, SalesmanService salesmanService) {
         this.lineInputService = lineInputService;
         this.fileRepository = fileRepository;
