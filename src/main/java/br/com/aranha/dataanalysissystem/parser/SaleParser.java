@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 public class SaleParser {
     public Sale parseSale(String lineSale) {
         String[] customerSplitData = lineSale.split("ç");
-        String id = customerSplitData[0];
-        List<Item> items = buildItems(customerSplitData[1]);
-        String name = customerSplitData[2];
+        String id = customerSplitData[1];
+        List<Item> items = buildItems(customerSplitData[2]);
+        String name = customerSplitData[3];
         return new Sale(id, items, name);
     }
 

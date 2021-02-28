@@ -1,7 +1,9 @@
 package br.com.aranha.dataanalysissystem.repository;
 
-import br.com.aranha.dataanalysissystem.domain.input.File;
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import br.com.aranha.dataanalysissystem.domain.input.FileReaded;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
-public interface FileRepository extends ReactiveMongoRepository<File, String> {
+@Repository
+public interface FileRepository extends MongoRepository<FileReaded, String> {
 }

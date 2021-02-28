@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 public class SalesmanParser {
     public Salesman parseSalesman(String lineSalesman) {
         String[] customerSplitData = lineSalesman.split("ç");
-        String cpf = customerSplitData[0];
-        String name = customerSplitData[1];
-        double salary = Double.parseDouble(customerSplitData[2]);
+        String cpf = customerSplitData[1];
+        String name = customerSplitData[2];
+        double salary = Double.parseDouble(customerSplitData[3]);
         return new Salesman(cpf, name, salary);
     }
 }

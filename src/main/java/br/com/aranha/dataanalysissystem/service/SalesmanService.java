@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SalesmanService implements RowDataService{
+
     @Autowired
     private SalesmanParser salesmanParser;
 

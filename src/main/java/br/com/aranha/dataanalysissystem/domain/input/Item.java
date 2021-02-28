@@ -1,8 +1,7 @@
 package br.com.aranha.dataanalysissystem.domain.input;
 
-import lombok.*;
-
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor
