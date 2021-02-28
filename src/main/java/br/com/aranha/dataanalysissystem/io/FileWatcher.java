@@ -110,8 +110,14 @@ public class FileWatcher implements Runnable {
     private void createFoldersIfNecessary() {
         File fileInput = new File(pathInput.toString());
         File fileOutput = new File(pathOutput.toString());
-        fileInput.mkdirs();
-        fileOutput.mkdirs();
+
+        if(!fileInput.exists()) {
+            fileInput.mkdirs();
+        }
+
+        if(!fileOutput.exists()) {
+            fileOutput.mkdirs();
+        }
     }
 
     private WatchService register() {
