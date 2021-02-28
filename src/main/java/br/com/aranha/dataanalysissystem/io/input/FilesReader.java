@@ -1,5 +1,7 @@
 package br.com.aranha.dataanalysissystem.io.input;
 
+import br.com.aranha.dataanalysissystem.domain.input.FileReaded;
+import br.com.aranha.dataanalysissystem.repository.FileRepository;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -16,8 +18,9 @@ import java.util.stream.Stream;
 
 @Component
 public class FilesReader {
-    public List<String> readFile(List<String> filesAlreadyReadList) throws IOException {
+    public List<String> readFile(List<String> filesAlreadyReadList, FileRepository fileRepository) throws IOException {
         List<File> files = getFilesToRead(filesAlreadyReadList);
+        saveAllFileNamesAlreadyRead(files, fileRepository);
         List<String> lines = new ArrayList<>();
         files.forEach(file -> {
             try {
@@ -46,5 +49,12 @@ public class FilesReader {
                         file.getName().equalsIgnoreCase(fileAlreadyRead)))
                 .filter(file -> file.getName().endsWith(".dat"))
                 .collect(Collectors.toList());
+    }
+
+    private void saveAllFileNamesAlreadyRead(List<File> files, FileRepository fileRepository) {
+        files.forEach(file -> {
+            FileReaded fileReaded = new FileReaded(file.getName());
+            fileRepository.save(fileReaded);
+        });
     }
 }

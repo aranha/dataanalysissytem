@@ -9,7 +9,6 @@ public class ItemParser {
         line = line.replace("[", "");
         line = line.replace("]", "");
         String [] itemSplitData = line.split("-");
-        System.out.println(line);
         String id = itemSplitData[0];
         int quantity = Integer.parseInt(itemSplitData[1]);
         double price = Double.parseDouble(itemSplitData[2]);

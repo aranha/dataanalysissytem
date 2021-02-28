@@ -1,21 +1,28 @@
 package br.com.aranha.dataanalysissystem.io.output;
 
 import br.com.aranha.dataanalysissystem.domain.output.Report;
+import br.com.aranha.dataanalysissystem.io.FileWatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Component
 public class FileWriter {
+    private static final Logger log = LoggerFactory.getLogger(FileWatcher.class);
+
     public void writeReport(Report report) {
-        String homePathOut = System.getProperty("user.home") + "/data/out/";
-        String outputFileName = "report.done.dat";
         try {
-            BufferedWriter writer = new BufferedWriter(new java.io.FileWriter(homePathOut + outputFileName, false));
-            writer.write(report.generateReport());
+            String homePathOut = System.getProperty("user.home") + "/data/out/";
+            String outputFileName = "report.done.dat";
+            Path path = Paths.get(homePathOut, outputFileName);
+            Files.write(path, report.generateReport().getBytes());
         } catch (IOException e) {
-            System.err.println("Cannot write a file, cause happened an error + " + e.getCause());
+           log.error("an error occurred in the try to save a new report", e.getCause());
         }
     }
 }

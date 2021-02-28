@@ -1,6 +1,5 @@
 package br.com.aranha.dataanalysissystem.service;
 
-import br.com.aranha.dataanalysissystem.DataAnalysisSystemApplication;
 import br.com.aranha.dataanalysissystem.enums.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

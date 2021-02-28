@@ -45,6 +45,11 @@ public class FileWatcher implements Runnable {
 
     private final SalesmanService salesmanService;
 
+    private final Path pathInput = Paths.get(System.getProperty("user.home"),"/data/in/");
+
+    private final Path pathOutput = Paths.get(System.getProperty("user.home"), "/data/out/");
+
+
     public FileWatcher(LineInputService lineInputService, FileRepository fileRepository, CustomerRepository customerRepository, SalesmanRepository salesmanRepository, SaleRepository saleRepository, FilesReader filesReader, FileWriter fileWriter, SalesmanService salesmanService) {
         this.lineInputService = lineInputService;
         this.fileRepository = fileRepository;
@@ -58,33 +63,22 @@ public class FileWatcher implements Runnable {
 
     @Override
     public void run() {
-        log.info("startedaranha");
         try {
             monitoringDirectoryAndWriteReport();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
     private void monitoringDirectoryAndWriteReport() throws IOException, InterruptedException {
-        Path pathInput = Paths.get("/data/in/");
-        Path pathOutput = Paths.get("/data/out/");
-        createFoldersIfNecessary(pathInput, pathOutput);
+        createFoldersIfNecessary();
+
         saveNewFiles();
         writeReport();
-        WatchService watchService = FileSystems.getDefault().newWatchService();
-        pathInput.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
-        while (true) {
-            WatchKey watchKey = watchService.take();
-            Optional<WatchEvent<?>> watchEvent = watchKey.pollEvents().stream().findFirst();
-            Path directory = (Path) watchEvent.get().context();
-            if(directory.endsWith(".dat")) {
-                saveNewFiles();
-                writeReport();
-            }
-        }
+
+        WatchService watchService = register();
+
+        detectNewFileInFolder(watchService);
     }
 
     private void saveNewFiles() throws IOException {
@@ -94,7 +88,7 @@ public class FileWatcher implements Runnable {
                 .map(FileReaded::getName)
                 .collect(Collectors.toList());
 
-        List<String> linesRead = filesReader.readFile(filesNameRead);
+        List<String> linesRead = filesReader.readFile(filesNameRead, fileRepository);
 
         linesRead.forEach(lineInputService::saveLine);
     }
@@ -113,8 +107,36 @@ public class FileWatcher implements Runnable {
         fileWriter.writeReport(report);
     }
 
-    private void createFoldersIfNecessary(Path pathInput, Path pathOutput) {
-        new File(System.getProperty("user.home"), pathInput.toString()).mkdir();
-        new File(System.getProperty("user.home"), pathOutput.toString()).mkdir();
+    private void createFoldersIfNecessary() {
+        File fileInput = new File(pathInput.toString());
+        File fileOutput = new File(pathOutput.toString());
+        fileInput.mkdirs();
+        fileOutput.mkdirs();
+    }
+
+    private WatchService register() {
+        WatchService watchService = null;
+        try {
+            watchService = FileSystems.getDefault().newWatchService();
+            pathInput.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+        } catch (IOException e) {
+            log.error("an error occurred when try to register new path to be monitored", e.getCause());
+        }
+        return watchService;
+    }
+
+    private void detectNewFileInFolder(WatchService watchService) throws InterruptedException, IOException {
+        while (true) {
+            WatchKey watchKey = watchService.take();
+            Optional<WatchEvent<?>> watchEvent = watchKey.pollEvents().stream().findFirst();
+            Path directory = (Path) watchEvent.get().context();
+            if(directory.toString().endsWith(".dat")) {
+                log.info("new file detected, name {}", directory.toString());
+                saveNewFiles();
+                writeReport();
+                FileReaded fileReaded = new FileReaded(directory.toString());
+                fileRepository.save(fileReaded);
+            }
+        }
     }
 }
