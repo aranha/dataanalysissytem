@@ -66,6 +66,10 @@ public class ReportService {
     }
 
     private String getWorstSalesman(List<Sale> allSales) {
+        if(allSales.isEmpty()) {
+            return "there's no sales saved";
+        }
+
         Map<String, List<Sale>> nameSalesmanWithAllSales = allSales.stream()
                 .collect(Collectors.groupingBy(Sale::getSalesmanName));
 

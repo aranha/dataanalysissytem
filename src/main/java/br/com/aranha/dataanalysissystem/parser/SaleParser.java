@@ -15,6 +15,9 @@ public class SaleParser {
     @Autowired
     private ParserProperties parserProperties;
 
+    @Autowired
+    private ItemParser itemParser;
+
     public Sale parseSale(String lineSale) {
         String[] customerSplitData = lineSale.split(parserProperties.getRowDataSplitter());
         String id = customerSplitData[parserProperties.getSaleIdIndex()];
@@ -24,7 +27,6 @@ public class SaleParser {
     }
 
     private List<Item> buildItems(String lineItems) {
-        ItemParser itemParser = new ItemParser();
         return Arrays
                 .stream(lineItems.split(parserProperties.getItemListSplitter()))
                 .collect(Collectors.toList())
