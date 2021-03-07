@@ -1,7 +1,9 @@
 package br.com.aranha.dataanalysissystem.io.input;
 
 import br.com.aranha.dataanalysissystem.domain.input.FileReaded;
+import br.com.aranha.dataanalysissystem.properties.IOProperties;
 import br.com.aranha.dataanalysissystem.repository.FileRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -18,6 +20,10 @@ import java.util.stream.Stream;
 
 @Component
 public class FilesReader {
+
+    @Autowired
+    private IOProperties ioProperties;
+
     public List<String> readFile(List<String> filesAlreadyReadList, FileRepository fileRepository) throws IOException {
         List<File> files = getFilesToRead(filesAlreadyReadList);
         saveAllFileNamesAlreadyRead(files, fileRepository);
@@ -38,7 +44,7 @@ public class FilesReader {
     }
 
     private List<File> getFilesToRead(List<String> filesAlreadyReadList) throws IOException {
-        final String homePathIn = System.getProperty("user.home") + "/data/in";
+        final String homePathIn = ioProperties.getInputDirectory();
 
         final Stream<Path> pathStream = Files.walk(Paths.get(homePathIn));
 
@@ -47,7 +53,7 @@ public class FilesReader {
                 .map(Path::toFile)
                 .filter(file -> filesAlreadyReadList.stream().noneMatch(fileAlreadyRead ->
                         file.getName().equalsIgnoreCase(fileAlreadyRead)))
-                .filter(file -> file.getName().endsWith(".dat"))
+                .filter(file -> file.getName().endsWith(ioProperties.getInputFileExtension()))
                 .collect(Collectors.toList());
     }
 

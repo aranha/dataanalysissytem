@@ -1,14 +1,16 @@
 package br.com.aranha.dataanalysissystem.io;
 
 import br.com.aranha.dataanalysissystem.domain.input.FileReaded;
-import br.com.aranha.dataanalysissystem.domain.output.Report;
 import br.com.aranha.dataanalysissystem.io.input.FilesReader;
 import br.com.aranha.dataanalysissystem.io.output.FileWriter;
+import br.com.aranha.dataanalysissystem.properties.IOProperties;
+import br.com.aranha.dataanalysissystem.properties.ParserProperties;
 import br.com.aranha.dataanalysissystem.repository.CustomerRepository;
 import br.com.aranha.dataanalysissystem.repository.FileRepository;
 import br.com.aranha.dataanalysissystem.repository.SaleRepository;
 import br.com.aranha.dataanalysissystem.repository.SalesmanRepository;
 import br.com.aranha.dataanalysissystem.service.LineInputService;
+import br.com.aranha.dataanalysissystem.service.ReportService;
 import br.com.aranha.dataanalysissystem.service.SalesmanService;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -39,74 +41,77 @@ public class FileWatcher implements Runnable {
 
     private final SaleRepository saleRepository;
 
-    private final FilesReader filesReader;
+    private final FilesReader fileReader;
 
     private final FileWriter fileWriter;
 
     private final SalesmanService salesmanService;
 
-    private final Path pathInput = Paths.get(System.getProperty("user.home"),"/data/in/");
+    private final ReportService reportService;
 
-    private final Path pathOutput = Paths.get(System.getProperty("user.home"), "/data/out/");
+    private final IOProperties ioProperties;
 
-    public FileWatcher(LineInputService lineInputService, FileRepository fileRepository, CustomerRepository customerRepository, SalesmanRepository salesmanRepository, SaleRepository saleRepository, FilesReader filesReader, FileWriter fileWriter, SalesmanService salesmanService) {
+    private final ParserProperties parserProperties;
+
+    public FileWatcher(LineInputService lineInputService, FileRepository fileRepository,
+                       CustomerRepository customerRepository, SalesmanRepository salesmanRepository,
+                       SaleRepository saleRepository, FilesReader fileReader, FileWriter fileWriter,
+                       SalesmanService salesmanService, ReportService reportService,
+                       IOProperties ioProperties, ParserProperties parserProperties) {
+
         this.lineInputService = lineInputService;
         this.fileRepository = fileRepository;
         this.customerRepository = customerRepository;
         this.salesmanRepository = salesmanRepository;
         this.saleRepository = saleRepository;
-        this.filesReader = filesReader;
+        this.fileReader = fileReader;
         this.fileWriter = fileWriter;
         this.salesmanService = salesmanService;
+        this.reportService = reportService;
+        this.ioProperties = ioProperties;
+        this.parserProperties = parserProperties;
     }
 
     @Override
     public void run() {
         try {
-            monitoringDirectoryAndWriteReport();
+            Path pathInput = Paths.get(ioProperties.getInputDirectory());
+            Path pathOutput = Paths.get(ioProperties.getOutputDirectory());
+
+            monitoringDirectoryAndWriteReport(pathInput, pathOutput);
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    private void monitoringDirectoryAndWriteReport() throws IOException, InterruptedException {
-        createFoldersIfNecessary();
+    private void monitoringDirectoryAndWriteReport(Path pathInput, Path pathOutput) throws IOException, InterruptedException {
+        createFoldersIfNecessary(pathInput, pathOutput);
 
         saveNewFiles();
         writeReport();
 
-        WatchService watchService = register();
+        WatchService watchService = register(pathInput);
 
         detectNewFileInFolder(watchService);
     }
 
     private void saveNewFiles() throws IOException {
-        List<FileReaded> fileReadedList = fileRepository.findAll();
+        List<FileReaded> fileReadList = fileRepository.findAll();
 
-        List<String> filesNameRead = Objects.requireNonNull(fileReadedList).stream()
+        List<String> filesNameRead = Objects.requireNonNull(fileReadList).stream()
                 .map(FileReaded::getName)
                 .collect(Collectors.toList());
 
-        List<String> linesRead = filesReader.readFile(filesNameRead, fileRepository);
+        List<String> linesRead = fileReader.readFile(filesNameRead, fileRepository);
 
         linesRead.forEach(lineInputService::saveLine);
     }
 
     private void writeReport() {
-        int amountClients = Math.toIntExact(customerRepository.count());
-
-        int amountSalesman = Math.toIntExact(salesmanRepository.count());
-
-        String mostExpensiveSaleId = "as";
-
-        String worstSalesmanEverName = "paulo";
-
-        Report report = new Report(amountClients, amountSalesman, mostExpensiveSaleId, worstSalesmanEverName);
-
-        fileWriter.writeReport(report);
+        fileWriter.writeReport(reportService.buildReport());
     }
 
-    private void createFoldersIfNecessary() {
+    private void createFoldersIfNecessary(Path pathInput, Path pathOutput) {
         File fileInput = new File(pathInput.toString());
         File fileOutput = new File(pathOutput.toString());
 
@@ -119,7 +124,7 @@ public class FileWatcher implements Runnable {
         }
     }
 
-    private WatchService register() {
+    private WatchService register(Path pathInput) {
         WatchService watchService = null;
         try {
             watchService = FileSystems.getDefault().newWatchService();
@@ -135,7 +140,7 @@ public class FileWatcher implements Runnable {
             WatchKey watchKey = watchService.take();
             Optional<WatchEvent<?>> watchEvent = watchKey.pollEvents().stream().findFirst();
             Path directory = (Path) watchEvent.get().context();
-            if(directory.toString().endsWith(".dat")) {
+            if(directory.toString().endsWith(ioProperties.getInputFileExtension())) {
                 log.info("new file detected, name {}", directory.toString());
                 saveNewFiles();
                 writeReport();
