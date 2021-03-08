@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 public enum DataType {
     SALESMAN("001"),
     CUSTOMER("002"),
-    SALES("003");
+    SALES("003"),
+    INVALID("-1");
 
     private final String lineTypeId;
 
@@ -18,6 +19,6 @@ public enum DataType {
         return Stream.of(values())
                 .filter(id -> id.lineTypeId.equalsIgnoreCase(lineTypeId))
                 .findFirst()
-                .orElse(null);
+                .orElse(INVALID);
     }
 }

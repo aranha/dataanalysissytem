@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class LineInputService {
 
@@ -23,14 +25,14 @@ public class LineInputService {
     public void saveLine(String line) {
         String idDataType = line.substring(0, 3);
         DataType dataType = DataType.getByLineTypeId(idDataType);
-        switch (dataType.getLineTypeId()){
-            case "001":
+        switch (dataType) {
+            case SALESMAN:
                 salesmanService.processNewRowData(line);
                 break;
-            case "002":
+            case CUSTOMER:
                 customerService.processNewRowData(line);
                 break;
-            case "003":
+            case SALES:
                 saleService.processNewRowData(line);
                 break;
             default:
