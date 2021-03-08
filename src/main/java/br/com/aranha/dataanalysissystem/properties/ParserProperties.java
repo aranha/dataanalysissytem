@@ -51,4 +51,10 @@ public class ParserProperties {
 
     @Value("${application.data.manipulation.parsing.index.item.price}")
     private Integer itemPriceIndex;
+
+    @Value("${application.data.manipulation.parsing.splitter.item-starter}")
+    private String itemStarter;
+
+    @Value("${application.data.manipulation.parsing.splitter.item-finisher}")
+    private String itemFinisher;
 }

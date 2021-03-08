@@ -11,7 +11,7 @@ public class ItemParser {
     private ParserProperties parserProperties;
 
     public Item parseItem(String line) {
-        line = line.replace("[", "").replace("]", "");
+        line = line.replace(parserProperties.getItemStarter(), "").replace(parserProperties.getItemFinisher(), "");
         String [] itemSplitData = line.split(parserProperties.getItemSplitter());
         String id = itemSplitData[parserProperties.getItemIdIndex()];
         int quantity = Integer.parseInt(itemSplitData[parserProperties.getItemQuantityIndex()]);

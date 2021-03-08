@@ -18,8 +18,11 @@ repositories {
     mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
-    implementation 'junit:junit:4.12'
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     implementation 'org.springframework.boot:spring-boot-starter'
     compileOnly 'org.projectlombok:lombok'
@@ -27,6 +30,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testCompile('org.powermock:powermock-api-mockito2:2.0.4')
     testCompile('org.powermock:powermock-module-junit4:2.0.4')
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
 }
 
 test {
