@@ -34,7 +34,7 @@ public class LineInputService {
                 saleService.processNewRowData(line);
                 break;
             default:
-                log.info("data type not valid: {}", dataType.getLineTypeId());
+                log.info("data type not valid: {}", line);
         }
     }
 }
