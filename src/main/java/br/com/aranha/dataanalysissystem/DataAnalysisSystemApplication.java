@@ -1,6 +1,6 @@
 package br.com.aranha.dataanalysissystem;
 
-import br.com.aranha.dataanalysissystem.io.FileWatcher;
+import br.com.aranha.dataanalysissystem.service.FileWatcherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ public class DataAnalysisSystemApplication implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DataAnalysisSystemApplication.class);
 
     @Autowired
-    private FileWatcher fileWatcher;
+    private FileWatcherService fileWatcherService;
 
     public static void main(String[] args) {
         SpringApplication.run(DataAnalysisSystemApplication.class, args);
@@ -22,6 +22,6 @@ public class DataAnalysisSystemApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("starting application");
-        new Thread(fileWatcher, "file-watcher").start();
+        new Thread(fileWatcherService, "file-watcher").start();
     }
 }

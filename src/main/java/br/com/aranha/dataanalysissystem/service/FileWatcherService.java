@@ -1,4 +1,4 @@
-package br.com.aranha.dataanalysissystem.io;
+package br.com.aranha.dataanalysissystem.service;
 
 import br.com.aranha.dataanalysissystem.domain.input.FileReaded;
 import br.com.aranha.dataanalysissystem.io.input.FilesReader;
@@ -9,13 +9,10 @@ import br.com.aranha.dataanalysissystem.repository.CustomerRepository;
 import br.com.aranha.dataanalysissystem.repository.FileRepository;
 import br.com.aranha.dataanalysissystem.repository.SaleRepository;
 import br.com.aranha.dataanalysissystem.repository.SalesmanRepository;
-import br.com.aranha.dataanalysissystem.service.LineInputService;
-import br.com.aranha.dataanalysissystem.service.ReportService;
-import br.com.aranha.dataanalysissystem.service.SalesmanService;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,11 +22,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @Data
-public class FileWatcher implements Runnable {
+public class FileWatcherService implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(FileWatcher.class);
+    private static final Logger log = LoggerFactory.getLogger(FileWatcherService.class);
 
     private final LineInputService lineInputService;
 
@@ -53,11 +50,11 @@ public class FileWatcher implements Runnable {
 
     private final ParserProperties parserProperties;
 
-    public FileWatcher(LineInputService lineInputService, FileRepository fileRepository,
-                       CustomerRepository customerRepository, SalesmanRepository salesmanRepository,
-                       SaleRepository saleRepository, FilesReader fileReader, FileWriter fileWriter,
-                       SalesmanService salesmanService, ReportService reportService,
-                       IOProperties ioProperties, ParserProperties parserProperties) {
+    public FileWatcherService(LineInputService lineInputService, FileRepository fileRepository,
+                              CustomerRepository customerRepository, SalesmanRepository salesmanRepository,
+                              SaleRepository saleRepository, FilesReader fileReader, FileWriter fileWriter,
+                              SalesmanService salesmanService, ReportService reportService,
+                              IOProperties ioProperties, ParserProperties parserProperties) {
 
         this.lineInputService = lineInputService;
         this.fileRepository = fileRepository;
@@ -85,6 +82,7 @@ public class FileWatcher implements Runnable {
     }
 
     private void monitoringDirectoryAndWriteReport(Path pathInput, Path pathOutput) throws IOException, InterruptedException {
+        log.info("starting monitoring directory");
         createFoldersIfNecessary(pathInput, pathOutput);
 
         saveNewFiles();
@@ -96,6 +94,7 @@ public class FileWatcher implements Runnable {
     }
 
     private void saveNewFiles() throws IOException {
+        log.info("saving new files");
         List<FileReaded> fileReadList = fileRepository.findAll();
 
         List<String> filesNameRead = Objects.requireNonNull(fileReadList).stream()
@@ -116,10 +115,12 @@ public class FileWatcher implements Runnable {
         File fileOutput = new File(pathOutput.toString());
 
         if(!fileInput.exists()) {
+            log.info("creating path input");
             fileInput.mkdirs();
         }
 
         if(!fileOutput.exists()) {
+            log.info("creating path output");
             fileOutput.mkdirs();
         }
     }
