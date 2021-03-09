@@ -58,3 +58,6 @@ be generated with this information.
 Imagining the second scenario the lines of the files will be processed, and these information will be saved in mongodb, and
 the name of the file also be saved in mongodb for don't read and save the same information.
 
+Below has a diagram describing how the solutions works:
+
+![](images/data-analysis-diagram.jpeg)
