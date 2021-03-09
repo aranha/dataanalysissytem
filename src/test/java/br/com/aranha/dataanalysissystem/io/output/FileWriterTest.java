@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.mockito.Mockito.when;
 
@@ -31,6 +33,10 @@ public class FileWriterTest {
         when(ioProperties.getReportFileName()).thenReturn("report");
         when(ioProperties.getOutputFileExtension()).thenReturn(".done.dat");
 
+        Path pathOutput = Paths.get(ioProperties.getOutputDirectory());
+
+        createOutputFolderIfNecessary(pathOutput);
+
         Report report = ReportStub.createReport();
 
         File file = new File(ioProperties.getOutputDirectory() + ioProperties.getReportFileName()
@@ -39,5 +45,13 @@ public class FileWriterTest {
         fileWriter.writeReport(report);
 
         Assertions.assertTrue(file.exists());
+    }
+
+    private void createOutputFolderIfNecessary(Path pathOutput) {
+        File fileOutput = new File(pathOutput.toString());
+
+        if(!fileOutput.exists()) {
+            fileOutput.mkdirs();
+        }
     }
 }

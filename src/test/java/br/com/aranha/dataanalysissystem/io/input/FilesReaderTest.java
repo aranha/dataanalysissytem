@@ -1,6 +1,5 @@
 package br.com.aranha.dataanalysissystem.io.input;
 
-import br.com.aranha.dataanalysissystem.io.output.FileWriter;
 import br.com.aranha.dataanalysissystem.properties.IOProperties;
 import br.com.aranha.dataanalysissystem.repository.FileRepository;
 import br.com.aranha.dataanalysissystem.stub.LineStringStub;
@@ -11,13 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +44,13 @@ public class FilesReaderTest {
                 "003ç10ç[1-10-100,2-30-2.50,3-40-3.10]çDiego\n" +
                 "003ç08ç[1-34-10,2-33-1.50,3-40-0.10]çRenato";
 
-        Files.write(Paths.get(System.getProperty("user.home") + "/data/in/test.dat"), file.getBytes());
+        String inputDirectory = System.getProperty("user.home") + "/data/in";
+
+        Path path = Paths.get(inputDirectory);
+
+        createInputFolderIfNecessary(path);
+
+        Files.write(Paths.get(inputDirectory + "/test.dat"), file.getBytes());
 
         when(ioProperties.getInputDirectory()).thenReturn(System.getProperty("user.home") + "/data/in/test.dat");
         when(ioProperties.getInputFileExtension()).thenReturn(".dat");
@@ -56,5 +62,13 @@ public class FilesReaderTest {
         Assertions.assertEquals(actual, expected);
 
         verify(fileRepository).save(any());
+    }
+
+    private void createInputFolderIfNecessary(Path pathInput) {
+        File fileInput = new File(pathInput.toString());
+
+        if(!fileInput.exists()) {
+            fileInput.mkdirs();
+        }
     }
 }
